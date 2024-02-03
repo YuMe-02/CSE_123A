@@ -1,0 +1,19 @@
+{
+  "build": { "dockerfile": "Dockerfile" },
+  "features": {
+  },
+  "customizations": {
+    "vscode": {
+	"extensions": ["espressif.esp-idf-extension",
+            "DavesCodeMusings.esptool",
+            "ms-python.python",
+            "ms-vscode.cpptools",
+            "ms-vscode.cpptools-extension-pack",
+            "ms-vscode.cpptools-themes",
+            "twxs.cmake",
+            "ms-python.debugpy",
+            "rust-lang.rust-analyzer"
+		    ]
+    }
+  },
+}
