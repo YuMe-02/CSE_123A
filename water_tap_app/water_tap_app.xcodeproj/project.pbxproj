@@ -14,6 +14,8 @@
 		B36E60922B8566AA00D56BA7 /* water_tap_appTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36E60912B8566AA00D56BA7 /* water_tap_appTests.swift */; };
 		B36E609C2B8566AA00D56BA7 /* water_tap_appUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36E609B2B8566AA00D56BA7 /* water_tap_appUITests.swift */; };
 		B36E609E2B8566AA00D56BA7 /* water_tap_appUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B36E609D2B8566AA00D56BA7 /* water_tap_appUITestsLaunchTests.swift */; };
+		B38D80502BC5EA2D0080AD6A /* HTTPTypes in Frameworks */ = {isa = PBXBuildFile; productRef = B38D804F2BC5EA2D0080AD6A /* HTTPTypes */; };
+		B38D80522BC5EA2D0080AD6A /* HTTPTypesFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = B38D80512BC5EA2D0080AD6A /* HTTPTypesFoundation */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +53,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B38D80502BC5EA2D0080AD6A /* HTTPTypes in Frameworks */,
+				B38D80522BC5EA2D0080AD6A /* HTTPTypesFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +147,10 @@
 			dependencies = (
 			);
 			name = water_tap_app;
+			packageProductDependencies = (
+				B38D804F2BC5EA2D0080AD6A /* HTTPTypes */,
+				B38D80512BC5EA2D0080AD6A /* HTTPTypesFoundation */,
+			);
 			productName = water_tap_app;
 			productReference = B36E607D2B8566A900D56BA7 /* water_tap_app.app */;
 			productType = "com.apple.product-type.application";
@@ -215,6 +223,9 @@
 				Base,
 			);
 			mainGroup = B36E60742B8566A900D56BA7;
+			packageReferences = (
+				B38D804E2BC5EA2D0080AD6A /* XCRemoteSwiftPackageReference "swift-http-types" */,
+			);
 			productRefGroup = B36E607E2B8566A900D56BA7 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -577,6 +588,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B38D804E2BC5EA2D0080AD6A /* XCRemoteSwiftPackageReference "swift-http-types" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-http-types";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B38D804F2BC5EA2D0080AD6A /* HTTPTypes */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B38D804E2BC5EA2D0080AD6A /* XCRemoteSwiftPackageReference "swift-http-types" */;
+			productName = HTTPTypes;
+		};
+		B38D80512BC5EA2D0080AD6A /* HTTPTypesFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B38D804E2BC5EA2D0080AD6A /* XCRemoteSwiftPackageReference "swift-http-types" */;
+			productName = HTTPTypesFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B36E60752B8566A900D56BA7 /* Project object */;
 }
