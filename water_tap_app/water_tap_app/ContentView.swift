@@ -7,13 +7,14 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct ContentView: View  {
     var body: some View {
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundColor(.accentColor)
-            Text("Hello, world!")
+            let request_text = http_request(method: "get", uri: "file.txt")
+            Text(request_text)
         }
         .padding()
     }
@@ -24,3 +25,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
