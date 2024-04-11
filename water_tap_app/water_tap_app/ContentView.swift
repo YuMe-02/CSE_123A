@@ -13,8 +13,13 @@ struct ContentView: View  {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundColor(.accentColor)
-            let request_text = http_request(method: "get", uri: "file.txt")
-            Text(request_text)
+            Text("Test")
+            let test = http_get_request_test()
+            if test == "" {
+                Text("Bad Request")
+            } else{
+                Text(test)
+            }
         }
         .padding()
     }
