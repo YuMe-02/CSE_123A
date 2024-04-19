@@ -35,7 +35,7 @@ struct LoginView: View {
                                 }
                             
                             Button(action: {
-                                // Simulating login logic here
+                                // will send a login request to api and if successful it will move to home view
                                 if password == "PASSWORD" && username == "USERNAME" {
                                     self.isLoggedIn = true
                                     self.showError = false // Reset error state upon successful login
