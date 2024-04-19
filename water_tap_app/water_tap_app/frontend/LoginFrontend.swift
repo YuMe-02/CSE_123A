@@ -12,45 +12,56 @@ struct LoginView: View {
     @State private var username = ""
     @State private var password = ""
     @State private var isLoggedIn = false
+    @State private var showError = false
     
-       var body: some View {
-           
-           NavigationStack {
-                       VStack {
-                           //username box
-                           TextField("Username", text: $username)
-                               .textFieldStyle(RoundedBorderTextFieldStyle())
-                               .padding()
-                           //password box
-                           SecureField("Password", text: $password)
-                               .textFieldStyle(RoundedBorderTextFieldStyle())
-                               .padding()
-                           
-                           Button(action: {
-                               // Simulating login logic here
-                               if password == "your_valid_password" {
-                                   self.isLoggedIn = true
-                               }
-                           }) {
-                               Text("Login")
-                                   .padding()
-                                   .background(Color.blue)
-                                   .foregroundColor(.white)
-                                   .cornerRadius(5)
-                           }
-                           .padding()
-                           
-                           NavigationLink(
-                               destination: ContentView(),
-                               isActive: $isLoggedIn,
-                               label: { EmptyView() }
-                           )
-                           .isDetailLink(false) // Prevents the back button from appearing on the destination view
-                       }
-                       .padding()
-                       .navigationTitle("Login")
-                   }
-               }
+    var body: some View {
+        if isLoggedIn {
+                    HomeView()
+                } else {
+                    NavigationView {
+                        VStack {
+                            TextField("Username", text: $username)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .padding()
+                                .onTapGesture {
+                                    self.username = ""
+                                }
+                            
+                            SecureField("Password", text: $password)
+                                .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .padding()
+                                .onTapGesture {
+                                    self.password = ""
+                                }
+                            
+                            Button(action: {
+                                // Simulating login logic here
+                                if password == "PASSWORD" && username == "USERNAME" {
+                                    self.isLoggedIn = true
+                                    self.showError = false // Reset error state upon successful login
+                                } else {
+                                    self.showError = true
+                                }
+                            }) {
+                                Text("Login")
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(5)
+                            }
+                            .padding()
+                            
+                            if showError {
+                                Text("Incorrect username or password")
+                                    .foregroundColor(.red)
+                                    .padding()
+                            }
+                        }
+                        .padding()
+                        .navigationBarTitle("Login", displayMode: .inline)
+                    }
+                }
+            }
 }
 
 enum Route {
@@ -58,22 +69,21 @@ enum Route {
 }
 
 struct TestLogin: View {
-    var body: some View{
-        NavigationStack {
-                   NavigationLink("Link1", value: Route.link1)
-                   NavigationLink("Link2", value: Route.link2)
-                       
-                       .navigationDestination(for: Route.self) { route in
-                           switch route {
-                           case .link1:
-                               //https://sarunw.com/posts/hide-navigation-back-button-in-swiftui/
-                               Link1().navigationBarBackButtonHidden(true)
-                           case .link2:
-                               Link2()
-                           }
-                       }
+var body: some View{
+    NavigationStack {
+       NavigationLink("Link1", value: Route.link1)
+       NavigationLink("Link2", value: Route.link2)
+           .navigationDestination(for: Route.self) { route in
+               switch route {
+               case .link1:
+                   //https://sarunw.com/posts/hide-navigation-back-button-in-swiftui/
+                   Link1().navigationBarBackButtonHidden(true)
+               case .link2:
+                   Link2()
                }
            }
+       }
+   }
 }
 
 

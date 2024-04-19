@@ -15,7 +15,7 @@ import UIKit
 struct water_tap_appApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LoginView()
         }
     }
 }
