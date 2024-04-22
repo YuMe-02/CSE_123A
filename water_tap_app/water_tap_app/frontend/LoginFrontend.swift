@@ -16,53 +16,71 @@ struct LoginView: View {
     
     var body: some View {
         if isLoggedIn {
-                    HomeView()
-                } else {
-                    NavigationView {
-                        VStack {
-                            TextField("Username", text: $username)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .padding()
-                                .onTapGesture {
-                                    self.username = ""
-                                }
-                            
-                            SecureField("Password", text: $password)
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .padding()
-                                .onTapGesture {
-                                    self.password = ""
-                                }
-                            
-                            Button(action: {
-                                // will send a login request to api and if successful it will move to home view
-                                if password == "PASSWORD" && username == "USERNAME" {
-                                    self.isLoggedIn = true
-                                    self.showError = false // Reset error state upon successful login
-                                } else {
-                                    self.showError = true
-                                }
-                            }) {
-                                Text("Login")
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(5)
-                            }
-                            .padding()
-                            
-                            if showError {
-                                Text("Incorrect username or password")
-                                    .foregroundColor(.red)
-                                    .padding()
-                            }
-                        }
+            HomeView()
+        } else {
+            NavigationView {
+                VStack {
+                    TextField("Username", text: $username)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
-                        .navigationBarTitle("Login", displayMode: .inline)
+                        .onTapGesture {
+                            self.username = ""
+                        }
+                    
+                    SecureField("Password", text: $password)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                        .onTapGesture {
+                            self.password = ""
+                        }
+                    
+                    // Button for logging in
+                    Button(action: {
+                        // will send a login request to api and if successful it will move to home view
+                        if password == "Password" && username == "Username" {
+                            self.isLoggedIn = true
+                            self.showError = false // Reset error state upon successful login
+                        } else {
+                            self.showError = true
+                        }
+                    }) {
+                        Text("Login")
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(5)
                     }
+                    .padding()
+                    
+                    // Show error message if login fails
+                    if showError {
+                        Text("Incorrect username or password")
+                            .foregroundColor(.red)
+                            .padding()
+                    }
+                    
+                    // Button to navigate to SignUpView
+                    NavigationLink(destination: SignUpView()) {
+                        Text("Sign Up")
+                            .padding()
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(5)
+                    }
+                    .padding()
                 }
+                .padding()
+                .navigationBarTitle("Login", displayMode: .inline)
             }
+        }
+    }
 }
+
+
+
+
+
+
 
 enum Route {
     case link1, link2
@@ -85,12 +103,6 @@ var body: some View{
        }
    }
 }
-
-
-
-
-
-
 
 struct Link1: View {
     var body: some View{
