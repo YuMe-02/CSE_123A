@@ -17,25 +17,29 @@ struct SignUpView: View {
     @State private var passwordsMatch = true
     @State private var emptyemail = true
     @State private var emptyuser = true
-    
-    
+    @State private var errorMessage = ""
+
     var body: some View {
         VStack {
             TextField("Email", text: $email, onCommit: resetEmailEmpty)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
+                .autocapitalization(.none) // Disable autocapitalization
             
             TextField("Username", text: $username, onCommit: resetUsernameEmpty)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
+                .autocapitalization(.none) // Disable autocapitalization
             
             SecureField("Password", text: $password, onCommit: resetPasswordMatch)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
+                .autocapitalization(.none) // Disable autocapitalization
             
             SecureField("Confirm Password", text: $confirmPassword, onCommit: resetPasswordMatch)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
+                .autocapitalization(.none) // Disable autocapitalization
             
             Button(action: signUp) {
                 if isSigningUp {
@@ -65,38 +69,48 @@ struct SignUpView: View {
                     .foregroundColor(.red)
                     .padding()
             }
+            if !errorMessage.isEmpty {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .padding()
+            }
         }
         .padding()
         .navigationBarTitle("Sign Up", displayMode: .inline)
     }
     
     func signUp() {
-        // Perform sign-up actions here
         if password == confirmPassword && !password.isEmpty && !email.isEmpty && !username.isEmpty {
-            // Passwords match, proceed with sign-up
             emptyuser = true
             emptyemail = true
             isSigningUp = true
-            print("send post request to server")
-            // Send data to server...
+            http_create_user(email: email, username: username, password: password) { response in
+                DispatchQueue.main.async {
+                    isSigningUp = false
+                    if response.contains("201") || response.contains("202") {
+                        // Successful sign-up, navigate back to login view
+                        // You may need to implement navigation here
+                        print("Sign-up successful")
+                    } else {
+                        // Error occurred
+                        errorMessage = "Error creating user. Please try again."
+                        print("Error creating user")
+                    }
+                }
+            }
         } else if password != confirmPassword {
-            // Passwords don't match
             passwordsMatch = false
-            print("non matching passwords")
         } else if email.isEmpty {
             emptyemail = false
-            print("empty email")
-        } else if username.isEmpty{
+        } else if username.isEmpty {
             emptyuser = false
-            print("empty username")
         }
-        
     }
     
     func resetPasswordMatch() {
-        // Reset the passwordsMatch state when the password fields change
         passwordsMatch = true
     }
+    
     func resetEmailEmpty() {
         emptyemail = true
     }
