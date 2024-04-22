@@ -47,41 +47,40 @@ func http_get_request_test2(completion: @escaping (String) -> Void) {
 }
 
 func http_create_user(email: String, username: String, password: String, completion: @escaping (String) -> Void){
-    //print("Email wanted: " + email)
-    //print("Username wanted: " + username)
-    //print("Password wanted: " + password)
     let url = URL(string: "https://cse123-flowsensor-server.com/signup")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
-    let parameters = SignUpData(
-        name: username,
-        email: email,
-        password: password
-    )
-    guard let jsonData = try? JSONEncoder().encode(parameters) else {
-            completion("Failed to serialize parameters")
-            print("Failed to serialize json")
-            return
+    
+    // Construct dictionary with parameters
+    let parameters: [String: Any] = [
+        "name": username,
+        "email": email,
+        "password": password
+    ]
+    
+    // Serialize dictionary into JSON data
+    guard let jsonData = try? JSONSerialization.data(withJSONObject: parameters) else {
+        completion("Failed to serialize parameters")
+        return
     }
+    
+    // Set request body
     request.httpBody = jsonData
-    print("request body: ", jsonData)
-    // Set the request's content type to JSON
-    //request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    // Create a URLSessionDataTask to send the request
+    
+    // Set request headers to indicate JSON content
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
-        // Check for any errors
         if let error = error {
             completion("Error: \(error.localizedDescription)")
             return
         }
         
-        // Check if there is any data returned
         guard let data = data else {
             completion("No data returned")
             return
         }
         
-        // Convert the data to a string
         if let responseString = String(data: data, encoding: .utf8) {
             completion(responseString)
         } else {
@@ -90,3 +89,4 @@ func http_create_user(email: String, username: String, password: String, complet
     }
     task.resume()
 }
+
