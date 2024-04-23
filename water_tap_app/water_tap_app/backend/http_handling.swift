@@ -69,7 +69,6 @@ func http_create_user(email: String, username: String, password: String, complet
     
     // Set request headers to indicate JSON content
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    
     let task = URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             completion("Error: \(error.localizedDescription)")

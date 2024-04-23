@@ -4,7 +4,7 @@
 
 ## User settings
 # water_tap_app.xcodeproj/xcuserdata
-# water_tap_app.xcodeproj/project.xcworkspace
+water_tap_app.xcodeproj/project.xcworkspace
 
 ## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
 *.xcscmblueprint
