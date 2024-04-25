@@ -87,10 +87,13 @@ struct SignUpView: View {
             http_create_user(email: email, username: username, password: password) { response in
                 DispatchQueue.main.async {
                     isSigningUp = false
-                    if response.contains("201") || response.contains("202") {
+                    print(response)
+                    if response.contains("201") {
                         // Successful sign-up, navigate back to login view
                         // You may need to implement navigation here
                         print("Sign-up successful")
+                    } else if response.contains("202"){
+                        print("User already exists")
                     } else {
                         // Error occurred
                         errorMessage = "Error creating user. Please try again."
