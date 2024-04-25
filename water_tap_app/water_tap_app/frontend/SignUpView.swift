@@ -18,6 +18,7 @@ struct SignUpView: View {
     @State private var emptyemail = true
     @State private var emptyuser = true
     @State private var errorMessage = ""
+    @State private var signResponse = 0
 
     var body: some View {
         VStack {
@@ -42,10 +43,17 @@ struct SignUpView: View {
                 .autocapitalization(.none) // Disable autocapitalization
             
             Button(action: signUp) {
-                if isSigningUp {
-                    Text("Sending info to server")
-                } else {
-                    Text("Sign Up")
+                Text("Sending info to server")
+                if(self.signResponse == 201){
+                    //go to login view
+                    LoginView()
+                    //display in text in the LoginView that user is created
+                } else if(self.signResponse == 202){
+                    //go to login view
+                    LoginView()
+                    //display in text in the LoginView that user already exists
+                } else{
+                    Text("User Creation Failed! Try Again!")
                 }
             }
             .padding()
@@ -87,11 +95,16 @@ struct SignUpView: View {
             http_create_user(email: email, username: username, password: password) { response in
                 DispatchQueue.main.async {
                     isSigningUp = false
-                    if response.contains("201") || response.contains("202") {
+                    self.signResponse = response
+                    print("Response code is: ", response)
+                    if response == 201 {
                         // Successful sign-up, navigate back to login view
                         // You may need to implement navigation here
                         print("Sign-up successful")
-                    } else {
+                    } else if response == 202 {
+                        print("User exists")
+                    }
+                    else {
                         // Error occurred
                         errorMessage = "Error creating user. Please try again."
                         print("Error creating user")
