@@ -8,16 +8,23 @@
 import Foundation
 import SwiftUI
 
+
+//LoginView is a parent of SignUpView
 struct LoginView: View {
     @State private var username = ""
     @State private var password = ""
     @State private var isLoggedIn = false
     @State private var showError = false
-    
+    @State private var userCreationMessage = ""
+    @State private var showUserCreated = false
+    @State private var showUserExists = false
+
     var body: some View {
         if isLoggedIn {
+            //user makes request to server
             HomeView()
         } else {
+            //try to login or make a new user
             NavigationView {
                 VStack {
                     TextField("Username", text: $username)
@@ -58,9 +65,8 @@ struct LoginView: View {
                             .foregroundColor(.red)
                             .padding()
                     }
-                    
                     // Button to navigate to SignUpView
-                    NavigationLink(destination: SignUpView()) {
+                    NavigationLink(destination: SignUpView(showCreatedUser: $showUserCreated, showExistsUser: $showUserExists)) {
                         Text("Sign Up")
                             .padding()
                             .background(Color.green)
@@ -68,6 +74,20 @@ struct LoginView: View {
                             .cornerRadius(5)
                     }
                     .padding()
+                    // Show user creation message from SignUpView
+                    if showUserCreated && !showUserExists{
+                        Text("User has been created!")
+                            .foregroundColor(.blue)
+                            .padding()
+                    } else if !showUserExists && showUserExists {
+                        Text("User already exists")
+                            .foregroundColor(.blue)
+                            .padding()
+                    } else {
+                        Text("")
+                            .foregroundColor(.blue)
+                            .padding()
+                    }
                 }
                 .padding()
                 .navigationBarTitle("Login", displayMode: .inline)
@@ -75,12 +95,6 @@ struct LoginView: View {
         }
     }
 }
-
-
-
-
-
-
 
 enum Route {
     case link1, link2
