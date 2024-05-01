@@ -22,68 +22,83 @@ struct SignUpView: View {
     @Binding var showCreatedUser: Bool
     @Binding var showExistsUser: Bool
     @State private var navigateToLogin = false
-
+    
     var body: some View {
-        if navigateToLogin {
-            NavigationLink(destination: LoginView(), isActive: $navigateToLogin) {
-                EmptyView()
-            }
-        } else {
-            VStack {
-                TextField("Email", text: $email, onCommit: resetEmailEmpty)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .autocapitalization(.none)
-                
-                TextField("Username", text: $username, onCommit: resetUsernameEmpty)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .autocapitalization(.none)
-                
-                SecureField("Password", text: $password, onCommit: resetPasswordMatch)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .autocapitalization(.none)
-                
-                SecureField("Confirm Password", text: $confirmPassword, onCommit: resetPasswordMatch)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
-                    .autocapitalization(.none)
-                
-                Button(action: signUp) {
-                    Text("Sign Up")
-                }
+        VStack {
+            TextField("Email", text: $email, onCommit: resetEmailEmpty)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-                .background(Color.green)
-                .foregroundColor(.white)
-                .cornerRadius(5)
+                .autocapitalization(.none)
+                .onTapGesture {
+                    self.email = ""
+                }
+            
+            TextField("Username", text: $username, onCommit: resetUsernameEmpty)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-                
-                if !passwordsMatch && confirmPassword.isEmpty {
-                    Text("Passwords don't match")
-                        .foregroundColor(.red)
-                        .padding()
+                .autocapitalization(.none)
+                .onTapGesture {
+                    self.username = ""
                 }
-                if !emptyuser {
-                    Text("Enter a username!")
-                        .foregroundColor(.red)
-                        .padding()
+            
+            SecureField("Password", text: $password, onCommit: resetPasswordMatch)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .autocapitalization(.none)
+                .onTapGesture {
+                    self.password = ""
                 }
-                if !emptyemail {
-                    Text("Enter an email address!")
-                        .foregroundColor(.red)
-                        .padding()
+            
+            SecureField("Confirm Password", text: $confirmPassword, onCommit: resetPasswordMatch)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .autocapitalization(.none)
+                .onTapGesture {
+                    self.confirmPassword = ""
                 }
-                if !errorMessage.isEmpty {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding()
-                }
+            Button(action: signUp) {
+                Text("Sign Up")
             }
             .padding()
+            .background(Color.green)
+            .foregroundColor(.white)
+            .cornerRadius(5)
+            .padding()
+            
+            if !passwordsMatch && confirmPassword.isEmpty {
+                Text("Passwords don't match")
+                    .foregroundColor(.red)
+                    .padding()
+            }
+            if !emptyuser {
+                Text("Enter a username!")
+                    .foregroundColor(.red)
+                    .padding()
+            }
+            if !emptyemail {
+                Text("Enter an email address!")
+                    .foregroundColor(.red)
+                    .padding()
+            }
+            if !errorMessage.isEmpty {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .padding()
+            }
+            
+            if signResponse == 201 {
+                Text("User created successfully. Go back to login.")
+                    .foregroundColor(.blue)
+                    .padding()
+            } else if signResponse == 202 {
+                Text("User already exists. Go back to login.")
+                    .foregroundColor(.blue)
+                    .padding()
+            }
         }
+        .padding()
     }
-
+    
     func resetPasswordMatch() {
         passwordsMatch = true
     }
@@ -101,24 +116,23 @@ struct SignUpView: View {
             emptyuser = true
             emptyemail = true
             isSigningUp = true
-            // Simulating sign-up response
-            signResponse = Int.random(in: 201...202)
-            if signResponse == 201 {
-                showCreatedUser = true
-                showExistsUser = false
-                errorMessage = ""
-                navigateToLogin = true // Navigate to LoginView upon successful sign-up
-            } else if signResponse == 202 {
-                showCreatedUser = false
-                showExistsUser = true
-                errorMessage = ""
-                navigateToLogin = true // Navigate to LoginView upon successful sign-up
-            } else {
-                // Error occurred
-                showCreatedUser = false
-                showExistsUser = false
-                errorMessage = "Error creating user. Please try again."
-                print("Error creating user")
+            http_create_user(email: email, username: username, password: password) { response in
+                DispatchQueue.main.async {
+                    isSigningUp = false
+                    print(response)
+                    signResponse = response
+                    if response == 201 {
+                        // Successful sign-up, navigate back to login view
+                        // You may need to implement navigation here
+                        print("Sign-up successful")
+                    } else if response == 202 {
+                        print("User already exists")
+                    } else {
+                        // Error occurred
+                        errorMessage = "Error creating user. Please try again."
+                        print("Error creating user")
+                    }
+                }
             }
         } else if password != confirmPassword {
             passwordsMatch = false

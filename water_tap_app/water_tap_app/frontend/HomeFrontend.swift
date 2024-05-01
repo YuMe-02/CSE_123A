@@ -11,11 +11,14 @@ import SwiftUI
 struct HomeView: View {
     @State private var responseData1: String = ""
     @State private var responseData2: String = ""
+    @Binding var jwt_token: String
     
     var body: some View {
         VStack {
             // Test 1
             VStack {
+                Text("JWT Token is Below:")
+                Text(jwt_token)
                 Image(systemName: "globe")
                     .imageScale(.large)
                     .foregroundColor(.accentColor)
@@ -46,7 +49,7 @@ struct HomeView: View {
                     self.responseData1 = result
                 }
             }
-            http_get_request_test2 { result2 in
+            http_get_request_test2(jwt: jwt_token) { result2 in
                 DispatchQueue.main.async {
                     self.responseData2 = result2
                 }

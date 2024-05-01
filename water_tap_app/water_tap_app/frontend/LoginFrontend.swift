@@ -11,46 +11,43 @@ import SwiftUI
 
 //LoginView is a parent of SignUpView
 struct LoginView: View {
-    @State private var username = ""
+    @State private var email = ""
     @State private var password = ""
     @State private var isLoggedIn = false
     @State private var showError = false
     @State private var userCreationMessage = ""
     @State private var showUserCreated = false
     @State private var showUserExists = false
+    @State private var jwt = ""
+    @State private var response_code = 0
 
     var body: some View {
         if isLoggedIn {
             //user makes request to server
-            HomeView()
+            HomeView(jwt_token: $jwt)
         } else {
             //try to login or make a new user
             NavigationView {
                 VStack {
-                    TextField("Username", text: $username)
+                    TextField("Email", text: $email)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
+                        .autocapitalization(.none)
                         .onTapGesture {
-                            self.username = ""
+                            self.email = ""
                         }
                     
                     SecureField("Password", text: $password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .padding()
+                        .autocapitalization(.none)
                         .onTapGesture {
                             self.password = ""
                         }
                     
                     // Button for logging in
-                    Button(action: {
-                        // will send a login request to api and if successful it will move to home view
-                        if password == "Password" && username == "Username" {
-                            self.isLoggedIn = true
-                            self.showError = false // Reset error state upon successful login
-                        } else {
-                            self.showError = true
-                        }
-                    }) {
+                    Button(action: login)
+                    {
                         Text("Login")
                             .padding()
                             .background(Color.blue)
@@ -94,6 +91,23 @@ struct LoginView: View {
             }
         }
     }
+    func login(){
+        if email.isEmpty {
+            print("Empty email")
+            return
+        }
+        if password.isEmpty {
+            print("Empty password")
+            return
+        }
+        http_login_user(email: email, password: password){ response, jwt_str, error_code in DispatchQueue.main.async {
+                if response == 201 {
+                    isLoggedIn = true
+                    jwt = jwt_str ?? ""
+                }
+            }
+        }
+    }
 }
 
 enum Route {
@@ -117,6 +131,8 @@ var body: some View{
        }
    }
 }
+
+
 
 struct Link1: View {
     var body: some View{

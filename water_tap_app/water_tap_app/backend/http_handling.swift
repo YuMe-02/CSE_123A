@@ -29,12 +29,16 @@ func http_get_request_test1(completion: @escaping (String) -> Void) {
     task.resume()
 }
 
-//basic test of our iphone api for test 2
-func http_get_request_test2(completion: @escaping (String) -> Void) {
+//basic test of our iphone api for test 2 - with JWT
+func http_get_request_test2(jwt: String, completion: @escaping (String) -> Void) {
     
     let url = URL(string: "https://cse123-flowsensor-server.com/api/iphone-test-2")!
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.addValue("\(jwt)", forHTTPHeaderField: "x-access-token")
     var empty_string: String = ""
-    let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
+    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
         guard let data = data else {
             print("get request failed")
             completion(empty_string) // Call completion handler with empty string
@@ -44,6 +48,51 @@ func http_get_request_test2(completion: @escaping (String) -> Void) {
         //print(empty_string)
         completion(empty_string) // Call completion handler with data string
     }
+    task.resume()
+}
+
+func http_login_user(email: String, password: String, completion: @escaping (Int?, String?, Error?) -> Void) {
+    let url = URL(string: "https://cse123-flowsensor-server.com/login")! // Corrected endpoint for login
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    let parameters: [String: Any] = [
+        "email": email,
+        "password": password
+    ]
+    // Serialize dictionary into JSON data
+    guard let jsonData = try? JSONSerialization.data(withJSONObject: parameters) else {
+        completion(nil, nil, NSError(domain: "Serialization", code: -1, userInfo: nil)) // Return error code for failed serialization
+        return
+    }
+    // Set request body
+    request.httpBody = jsonData
+    
+    // Set request headers to indicate JSON content
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            completion(nil, nil, error) // Return error from URLSession error
+            return
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            completion(nil, nil, NSError(domain: "Response", code: -2, userInfo: nil)) // Return error for invalid response
+            return
+        }
+        do {
+            // make sure this JSON is in the format we expect
+            if let json = try JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String: Any] {
+                // try to read out a string array
+                let token_temp = json["token"]
+                completion(httpResponse.statusCode, token_temp as? String, nil)
+                }
+        } catch let error as NSError {
+            print("Failed to load: \(error.localizedDescription)")
+            completion(nil, nil, NSError(domain: "Response", code: -2, userInfo: nil))
+        }
+    }
+    
     task.resume()
 }
 
@@ -98,8 +147,6 @@ func http_create_user(email: String, username: String, password: String, complet
     }
     task.resume()
 }
-
-
 
 func valid_password(password: String) -> Bool {
     // Password must be greater than or equal to 8 characters
@@ -161,4 +208,5 @@ func valid_email(email: String) -> Bool {
     // Evaluate the predicate with the email string
     return emailPredicate.evaluate(with: email)
 }
+
 
