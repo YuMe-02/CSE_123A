@@ -1,0 +1,4 @@
+nohup: ignoring input
+python3: can't open file '/home/ubuntu/CSE_123_Flow_Server/templates/app.py': [Errno 2] No such file or directory
+nohup: ignoring input
+python3: can't open file '/home/ubuntu/CSE_123_Flow_Server/templates/app.py': [Errno 2] No such file or directory
