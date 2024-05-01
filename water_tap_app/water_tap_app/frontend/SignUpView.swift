@@ -18,35 +18,46 @@ struct SignUpView: View {
     @State private var emptyemail = true
     @State private var emptyuser = true
     @State private var errorMessage = ""
-
+    @State private var signResponse = 0
+    @Binding var showCreatedUser: Bool
+    @Binding var showExistsUser: Bool
+    @State private var navigateToLogin = false
+    
     var body: some View {
         VStack {
             TextField("Email", text: $email, onCommit: resetEmailEmpty)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-                .autocapitalization(.none) // Disable autocapitalization
+                .autocapitalization(.none)
+                .onTapGesture {
+                    self.email = ""
+                }
             
             TextField("Username", text: $username, onCommit: resetUsernameEmpty)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-                .autocapitalization(.none) // Disable autocapitalization
+                .autocapitalization(.none)
+                .onTapGesture {
+                    self.username = ""
+                }
             
             SecureField("Password", text: $password, onCommit: resetPasswordMatch)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-                .autocapitalization(.none) // Disable autocapitalization
+                .autocapitalization(.none)
+                .onTapGesture {
+                    self.password = ""
+                }
             
             SecureField("Confirm Password", text: $confirmPassword, onCommit: resetPasswordMatch)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-                .autocapitalization(.none) // Disable autocapitalization
-            
-            Button(action: signUp) {
-                if isSigningUp {
-                    Text("Sending info to server")
-                } else {
-                    Text("Sign Up")
+                .autocapitalization(.none)
+                .onTapGesture {
+                    self.confirmPassword = ""
                 }
+            Button(action: signUp) {
+                Text("Sign Up")
             }
             .padding()
             .background(Color.green)
@@ -74,9 +85,30 @@ struct SignUpView: View {
                     .foregroundColor(.red)
                     .padding()
             }
+            
+            if signResponse == 201 {
+                Text("User created successfully. Go back to login.")
+                    .foregroundColor(.blue)
+                    .padding()
+            } else if signResponse == 202 {
+                Text("User already exists. Go back to login.")
+                    .foregroundColor(.blue)
+                    .padding()
+            }
         }
         .padding()
-        .navigationBarTitle("Sign Up", displayMode: .inline)
+    }
+    
+    func resetPasswordMatch() {
+        passwordsMatch = true
+    }
+    
+    func resetEmailEmpty() {
+        emptyemail = true
+    }
+    
+    func resetUsernameEmpty() {
+        emptyuser = true
     }
     
     func signUp() {
@@ -88,11 +120,12 @@ struct SignUpView: View {
                 DispatchQueue.main.async {
                     isSigningUp = false
                     print(response)
-                    if response.contains("201") {
+                    signResponse = response
+                    if response == 201 {
                         // Successful sign-up, navigate back to login view
                         // You may need to implement navigation here
                         print("Sign-up successful")
-                    } else if response.contains("202"){
+                    } else if response == 202 {
                         print("User already exists")
                     } else {
                         // Error occurred
@@ -108,17 +141,5 @@ struct SignUpView: View {
         } else if username.isEmpty {
             emptyuser = false
         }
-    }
-    
-    func resetPasswordMatch() {
-        passwordsMatch = true
-    }
-    
-    func resetEmailEmpty() {
-        emptyemail = true
-    }
-    
-    func resetUsernameEmpty() {
-        emptyuser = true
     }
 }
