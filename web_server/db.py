@@ -20,13 +20,22 @@ def conn_db():
 
     return (conn.cursor(), conn)
 
+def drop_all_db():
+    cur, conn = conn_db()
+    cur.execute("""DROP TABLE IF EXISTS sessions""")
+    cur.execute("""DROP TABLE IF EXISTS sensors""")
+    cur.execute("""DROP TABLE IF EXISTS users""")
+
+    conn.commit()
+    conn.close()
+
 def init_db():
     cur, conn = conn_db()
 
     cur.execute("""
             CREATE TABLE IF NOT EXISTS sessions
             (
-                user_id CHAR(50),
+                user_id CHAR(50) REFERENCES users(public_id),
                 session_id INT,
                 sink_id INT,
                 sensor_id INT,
@@ -42,13 +51,25 @@ def init_db():
     conn.commit()
     conn.close()
 
+def init_sensor_db():
+    cur, conn = conn_db()
+
+    cur.execute("""
+                CREATE TABLE IF NOT EXISTS sensors
+                (
+                    user_id CHAR(50) REFERENCES users(public_id),
+                    sensor_id INT,
+                    sink_id INT,
+                    PRIMARY KEY(user_id, sensor_id)
+                )""")
+    conn.commit()
+    conn.close()
+
+
 def init_user_db():
     cur, conn = conn_db()
    
     #for testing purposes, replace with more sophisticated table creation and deletion when having dependencies
-
-    cur.execute("""
-                DROP TABLE users""")
 
     cur.execute("""
                 CREATE TABLE IF NOT EXISTS users
@@ -75,10 +96,33 @@ def init_key_db():
     conn.commit()
     conn.close()
 
-def insert_db(sessions, session_id, sink_id, sensor_id, water_amount, duration, start_time, end_time, date, is_error):
+def insert_sensor_db(user_id, sensor_id, sink_id):
     cur, conn = conn_db()
 
-    cur.execute("""INSERT INTO sessions (session_id,
+    cur.execute("""INSERT INTO sensors (user_id, sensor_id, sink_id)
+                VALUES (%s, %s, %s)""", (user_id, sensor_id, sink_id))
+    conn.commit()
+    conn.close()
+
+def query_sensor_db(user_id, sink_id):
+    cur, conn = conn_db()
+
+    cur.execute("""SELECT * FROM sensors s
+                WHERE s.user_id = %s
+                AND s.sink_id = %s""", (user_id, sink_id))
+    
+    data = cur.fetchall()
+    if len(data) == 0:
+        return True
+    elif len(data) != 0:
+        return False
+
+
+def insert_db(public_uuid, sessions, session_id, sink_id, sensor_id, water_amount, duration, start_time, end_time, date, is_error):
+    cur, conn = conn_db()
+
+    cur.execute("""INSERT INTO sessions (user_id, 
+                                    session_id,
                                     sink_id,
                                     sensor_id,
                                     water_amount,
@@ -87,7 +131,8 @@ def insert_db(sessions, session_id, sink_id, sensor_id, water_amount, duration, 
                                     end_time,
                                     date,
                                     is_error)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", (session_id,
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (public_uuid, 
+                                                                session_id,
                                                                 sink_id,
                                                                 sensor_id,
                                                                 water_amount,

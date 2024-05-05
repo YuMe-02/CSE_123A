@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, abort, make_response
-from db import init_user_db, init_db, init_key_db, insert_db, insert_user_db, request_db, query_apiauth_by_key, replace_key, query_user_db, query_user_email
+from db import drop_all_db, init_user_db, init_db, init_key_db, init_sensor_db, insert_sensor_db, insert_db, insert_user_db, query_sensor_db, request_db, query_apiauth_by_key, replace_key, query_user_db, query_user_email
 from functools import wraps
 from datetime import datetime, timedelta
 from keygen import gen_api_key
@@ -22,7 +22,9 @@ secret_key = os.environ['JWT_SECRET_KEY']
 app.config['SECRET_KEY'] = secret_key
 
 #database initializations
+drop_all_db()
 init_user_db()
+init_sensor_db()
 init_db()
 init_key_db()
 
@@ -35,11 +37,9 @@ def token_required(f):
         token = None
         print("args: ", args)
         print("f: ",f)
-        print("This request needs a token, has headers: ",request.headers)
         #jwt is passed in the request header
         if 'x-access-token' in request.headers:
             token = request.headers['x-access-token']
-            print("There is a token: ", token)
         #return 401 if token is not passed
         if not token:
             return jsonify({'message' : 'Token is missing !!'}), 401
@@ -53,7 +53,7 @@ def token_required(f):
                 'message' : 'Token is invalid !!'
             }), 401
         #returns the current logged in users context to the routes
-        return f(current_user, *args, **kwargs)
+        return f(current_user[0], *args, **kwargs)
 
     return decorated
 
@@ -132,7 +132,7 @@ def send_data():
     date = request.json['date']
     is_error = request.json['is_error']
 
-    insert_db('sessions', session_id, sink_id, sensor_id, water_amount, duration, start_time, end_time, date, is_error)
+    insert_db('sessions', "test-user", session_id, sink_id, sensor_id, water_amount, duration, start_time, end_time, date, is_error)
 
     if ((datetime.strptime(date, '%Y-%m-%d').date() - query_resp[1]) >= timedelta(days=7)):
         reiss = True
@@ -268,6 +268,20 @@ def signup():
     else:
         # returns 202 if user already exists
         return make_response('User already exists. Please Log in.', 202)
+
+@app.route('/sensors', methods=['POST'])
+@token_required
+def validate_sensor(current_user):
+    sensor_id, sink_id = request.json['sensor_id'], request.json['sink_id']
+    #insert into database
+    if_already_exists = query_sensor_db(current_user, sink_id)
+    if not if_already_exists:
+        return make_response('Sensor already exists.', 202)
+    insert_sensor_db(current_user, sensor_id, sink_id)
+    return make_response('Sensor successfully registered.', 201)
+    #print(current_user)
+    return('Success?', 200)
+
 
 @app.route('/post-echo', methods=['POST'])
 def post_echo():
