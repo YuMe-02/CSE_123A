@@ -10,6 +10,8 @@ const char* ssid = "mitch laptop";
 const char* password = "lol123456";
 const char* mqttServer = "192.168.137.13";
 const int mqttPort = 1883;
+int count = 0;
+float saved;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -62,9 +64,9 @@ void loop() {
     flow_count = 0; // Reset flow count
     attachInterrupt(digitalPinToInterrupt(FLOW_SENSOR_PIN), pulseCounter, RISING); // Reattach interrupt
 
-    //Serial.print(F("Flow Rate: "));
-    //Serial.print(flowRate);
-    //Serial.println(F(" L/min"));
+    Serial.print(F("Flow Rate: "));
+    Serial.print(flowRate);
+    Serial.println(F(" L/min"));
 
     // Check if flow is active
     if (flowRate > 0) {
@@ -74,21 +76,43 @@ void loop() {
         startTime = millis();
       }
 
-      cumSum += (flowRate / 60);
+      if(count == 0) {
+        saved = 0.18;
+      } else if(flowRate >= 10) {
+        Serial.print("Saved: ");
+        Serial.println(saved);
+        cumSum += (saved / 60);
+      } else if(flowRate < 10) {
+        cumSum += (flowRate / 60);
+        saved = flowRate;
+      } else {
+        saved = 0.18;
+      }
 
+      count = count + 1;
     } else {
       // If flow has stopped and we have recorded a start time, calculate total volume and reset start time
       if (startTime != 0) {
         endTime = millis();
         
         unsigned long duration = (endTime - startTime) / 1000;
+        Serial.print("Is connected to mqtt? ");
+        Serial.println(client.connected());
+        while(!client.connected()) {
+          client.connect("XIAOClient");
+        }
+        if(client.connected()) {
+          Serial.println("Connected!");
+        }
         Serial.print(F("Total Volume: "));
-        Serial.println(cumSum - .18);
+        Serial.println(cumSum - .12);
         Serial.println(duration);
 
         char buffer[50];
+        const char* sensor_id = "12345";
+        const char* sink_id = "kitchen";
 
-        sprintf(buffer, "%.2f\n%d\n", cumSum-.18, duration);
+        sprintf(buffer, "%.2f\n%d\n%s\n%s\n", cumSum - .12, duration, sensor_id, sink_id);
 
         client.publish("flow", buffer);
 
