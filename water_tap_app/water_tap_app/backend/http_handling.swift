@@ -209,4 +209,25 @@ func valid_email(email: String) -> Bool {
     return emailPredicate.evaluate(with: email)
 }
 
+func http_query_session(jwt: String, date: String, sinkid: String, completion: @escaping (String) -> Void) {
+    let endpoint = "https://cse123-flowsensor-server.com/api/user-data?" + date + "&" + "sink_id=" + sinkid
+    print("The expected enpoint is: " + endpoint)
+    let url = URL(string: endpoint)!
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.addValue("\(jwt)", forHTTPHeaderField: "x-access-token")
+    var empty_string: String = ""
+    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        guard let data = data else {
+            print("get request failed")
+            completion(empty_string) // Call completion handler with empty string
+            return
+        }
+        empty_string = String(data: data, encoding: .utf8) ?? ""
+        //print(empty_string)
+        completion(empty_string) // Call completion handler with data string
+    }
+    task.resume()
+}
 
