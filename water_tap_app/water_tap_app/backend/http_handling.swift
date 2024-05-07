@@ -58,7 +58,7 @@ func http_get_request_test2(jwt: String, completion: @escaping (String) -> Void)
 }
 
 //Function to register new sensor
-func http_register_sensor(sensor_id: String, sink_id: String, completion: @escaping (Int?, String?, Error?) -> Void) {
+func http_register_sensor(jwt: String, sensor_id: String, sink_id: String, completion: @escaping (Int?, String?, Error?) -> Void) {
     let url = URL(string: "https://cse123-flowsensor-server.com/api/sensors/register")! // Corrected endpoint for login
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
@@ -66,6 +66,8 @@ func http_register_sensor(sensor_id: String, sink_id: String, completion: @escap
         "sensor_id": sensor_id,
         "sink_id": sink_id
     ]
+    //add jwt
+    request.addValue("\(jwt)", forHTTPHeaderField: "x-access-token")
     // Serialize dictionary into JSON data
     guard let jsonData = try? JSONSerialization.data(withJSONObject: parameters) else {
         completion(nil, nil, NSError(domain: "Serialization", code: -1, userInfo: nil)) // Return error code for failed serialization
