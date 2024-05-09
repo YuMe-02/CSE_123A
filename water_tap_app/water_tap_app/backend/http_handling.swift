@@ -264,7 +264,7 @@ func valid_email(email: String) -> Bool {
 }
 
 func http_query_session(jwt: String, date: String, sinkid: String, completion: @escaping (String) -> Void) {
-    let endpoint = "https://cse123-flowsensor-server.com/api/user-data?" + date + "&" + "sink_id=" + sinkid
+    let endpoint = "https://cse123-flowsensor-server.com/api/user-data?" + "date=" + date + "&" + "sink_id=" + sinkid
     print("The expected enpoint is: " + endpoint)
     let url = URL(string: endpoint)!
     var request = URLRequest(url: url)
