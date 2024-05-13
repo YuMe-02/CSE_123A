@@ -12,6 +12,8 @@ const char* mqttServer = "192.168.137.13";
 const int mqttPort = 1883;
 int count = 0;
 float saved;
+int wifi_led = D5;
+int power_led = D7;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -28,6 +30,8 @@ void IRAM_ATTR pulseCounter() {
 
 void setup() {
   Serial.begin(115200);
+  pinMode(power_led, OUTPUT);
+  digitalWrite(power_led, HIGH);
   WiFi.begin(ssid, password);
 
     while (WiFi.status() != WL_CONNECTED) {
@@ -35,6 +39,9 @@ void setup() {
         Serial.println("Connecting to WiFi..");
     }
 
+    pinMode(wifi_led, OUTPUT);
+    digitalWrite(wifi_led, HIGH);
+    Serial.println("LED ON");
     Serial.println("Connected to WiFi");
 
     client.setServer(mqttServer, mqttPort);
