@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timedelta
 
 def on_connect(client, userdata, flags, rc):
-	print("connected!")
+	print("Connected with result code "+str(rc))
 	client.subscribe("flow")
 
 def parse_input(input_text):
@@ -52,7 +52,6 @@ def on_message(client, userdata, msg):
 	print(response.json())
 	session_id = session_id + 1
 	
-
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
@@ -60,3 +59,4 @@ client.on_message = on_message
 client.connect("192.168.137.13", 1883, 60)
 
 client.loop_forever()
+
