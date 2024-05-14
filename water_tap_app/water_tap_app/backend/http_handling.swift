@@ -18,44 +18,6 @@ struct SensorRegisterData: Encodable {
     let sink_id: String
 }
 
-//basic test of our iphone api for test 1
-func http_get_request_test1(completion: @escaping (String) -> Void) {
-    let url = URL(string: "https://cse123-flowsensor-server.com/api/iphone-test")!
-    var empty_string: String = ""
-    let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-        guard let data = data else {
-            print("get request failed")
-            completion(empty_string) // Call completion handler with empty string
-            return
-        }
-        empty_string = String(data: data, encoding: .utf8) ?? ""
-        //print(empty_string)
-        completion(empty_string) // Call completion handler with data string
-    }
-    task.resume()
-}
-
-//basic test of our iphone api for test 2 - with JWT
-func http_get_request_test2(jwt: String, completion: @escaping (String) -> Void) {
-    
-    let url = URL(string: "https://cse123-flowsensor-server.com/api/iphone-test-2")!
-    var request = URLRequest(url: url)
-    request.httpMethod = "GET"
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    request.addValue("\(jwt)", forHTTPHeaderField: "x-access-token")
-    var empty_string: String = ""
-    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-        guard let data = data else {
-            print("get request failed")
-            completion(empty_string) // Call completion handler with empty string
-            return
-        }
-        empty_string = String(data: data, encoding: .utf8) ?? ""
-        //print(empty_string)
-        completion(empty_string) // Call completion handler with data string
-    }
-    task.resume()
-}
 
 //Function to register new sensor
 func http_register_sensor(jwt: String, sensor_id: String, sink_id: String, completion: @escaping (Int?, String?, Error?) -> Void) {

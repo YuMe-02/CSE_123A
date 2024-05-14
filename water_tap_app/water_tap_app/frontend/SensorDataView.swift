@@ -68,23 +68,38 @@ struct SensorDataView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            ForEach(sessionData, id: \.sessionID) { session in
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("Session ID: \(session.sessionID)")
-                    Text("Sink ID: \(session.sinkID)")
-                    Text("Sensor ID: \(session.sensorID)")
-                    Text("Water Amount: \(session.waterAmount)")
-                    Text("Duration: \(session.duration)")
-                    Text("Start Time: \(session.startTime)")
-                    Text("End Time: \(session.endTime)")
-                    Text("Date: \(session.date)")
+        ScrollView {
+            VStack(spacing: 20) {
+                ForEach(sessionData, id: \.sessionID) { session in
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("\(session.startTime) - \(session.endTime)")
+                                .font(.headline)
+                                .padding(.bottom, 4)
+                            Spacer()
+                        }
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Session ID: \(session.sessionID)")
+                                Text("Sink ID: \(session.sinkID)")
+                                Text("Sensor ID: \(session.sensorID)")
+                                Text("Water Amount: \(session.waterAmount)")
+                                Text("Duration: \(session.duration)")
+                                Text("Date: \(session.date)")
+                            }
+                            Spacer()
+                        }
+                    }
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(10)
                 }
-                .padding()
-                .border(Color.gray)
             }
+            .padding()
         }
-        .padding()
+        .background(Color.white)
+        .edgesIgnoringSafeArea(.all)
     }
+
 }
 
