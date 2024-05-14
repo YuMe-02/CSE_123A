@@ -12,42 +12,58 @@ struct SignUpData: Encodable {
     let email: String
     let password: String
 }
-//basic test of our iphone api for test 1
-func http_get_request_test1(completion: @escaping (String) -> Void) {
-    let url = URL(string: "https://cse123-flowsensor-server.com/api/iphone-test")!
-    var empty_string: String = ""
-    let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
-        guard let data = data else {
-            print("get request failed")
-            completion(empty_string) // Call completion handler with empty string
-            return
-        }
-        empty_string = String(data: data, encoding: .utf8) ?? ""
-        //print(empty_string)
-        completion(empty_string) // Call completion handler with data string
-    }
-    task.resume()
+
+struct SensorRegisterData: Encodable {
+    let sensor_id: String
+    let sink_id: String
 }
 
-//basic test of our iphone api for test 2 - with JWT
-func http_get_request_test2(jwt: String, completion: @escaping (String) -> Void) {
-    
-    let url = URL(string: "https://cse123-flowsensor-server.com/api/iphone-test-2")!
+
+//Function to register new sensor
+func http_register_sensor(jwt: String, sensor_id: String, sink_id: String, completion: @escaping (Int?, String?, Error?) -> Void) {
+    let url = URL(string: "https://cse123-flowsensor-server.com/api/sensors/register")! // Corrected endpoint for login
     var request = URLRequest(url: url)
-    request.httpMethod = "GET"
-    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.httpMethod = "POST"
+    let parameters: [String: Any] = [
+        "sensor_id": sensor_id,
+        "sink_id": sink_id
+    ]
+    //add jwt
     request.addValue("\(jwt)", forHTTPHeaderField: "x-access-token")
-    var empty_string: String = ""
-    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
-        guard let data = data else {
-            print("get request failed")
-            completion(empty_string) // Call completion handler with empty string
+    // Serialize dictionary into JSON data
+    guard let jsonData = try? JSONSerialization.data(withJSONObject: parameters) else {
+        completion(nil, nil, NSError(domain: "Serialization", code: -1, userInfo: nil)) // Return error code for failed serialization
+        return
+    }
+    // Set request body
+    request.httpBody = jsonData
+    
+    // Set request headers to indicate JSON content
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            completion(nil, nil, error) // Return error from URLSession error
             return
         }
-        empty_string = String(data: data, encoding: .utf8) ?? ""
-        //print(empty_string)
-        completion(empty_string) // Call completion handler with data string
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            completion(nil, nil, NSError(domain: "Response", code: -2, userInfo: nil)) // Return error for invalid response
+            return
+        }
+        do {
+            // make sure this JSON is in the format we expect
+            if let json = try JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String: Any] {
+                // try to read out a string array
+                let message = json["message"]
+                completion(httpResponse.statusCode, message as? String, nil)
+                }
+        } catch let error as NSError {
+            print("Failed to load: \(error.localizedDescription)")
+            completion(nil, nil, NSError(domain: "Response", code: -2, userInfo: nil))
+        }
     }
+    
     task.resume()
 }
 
@@ -209,4 +225,25 @@ func valid_email(email: String) -> Bool {
     return emailPredicate.evaluate(with: email)
 }
 
+func http_query_session(jwt: String, date: String, sinkid: String, completion: @escaping (String) -> Void) {
+    let endpoint = "https://cse123-flowsensor-server.com/api/user-data?" + "date=" + date + "&" + "sink_id=" + sinkid
+    print("The expected enpoint is: " + endpoint)
+    let url = URL(string: endpoint)!
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.addValue("\(jwt)", forHTTPHeaderField: "x-access-token")
+    var empty_string: String = ""
+    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        guard let data = data else {
+            print("get request failed")
+            completion(empty_string) // Call completion handler with empty string
+            return
+        }
+        empty_string = String(data: data, encoding: .utf8) ?? ""
+        //print(empty_string)
+        completion(empty_string) // Call completion handler with data string
+    }
+    task.resume()
+}
 

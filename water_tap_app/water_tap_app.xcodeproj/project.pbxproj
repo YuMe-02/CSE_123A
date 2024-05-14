@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		336ED8762BE193DE00E7FED0 /* test.swift in Sources */ = {isa = PBXBuildFile; fileRef = 336ED8752BE193DE00E7FED0 /* test.swift */; };
+		713E73D82BEC301C00CD79DD /* SensorDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 713E73D72BEC301C00CD79DD /* SensorDataView.swift */; };
+		71C26CB12BF3D1EE001E7D4C /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71C26CB02BF3D1EE001E7D4C /* QRScannerView.swift */; };
 		B3140C472BD1E8810063724C /* LoginFrontend.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3140C452BD1E8810063724C /* LoginFrontend.swift */; };
 		B3140C482BD1E8810063724C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3140C462BD1E8810063724C /* ContentView.swift */; };
 		B3140C4D2BD1E96E0063724C /* http_handling.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3140C4C2BD1E96E0063724C /* http_handling.swift */; };
@@ -42,6 +44,8 @@
 
 /* Begin PBXFileReference section */
 		336ED8752BE193DE00E7FED0 /* test.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = test.swift; sourceTree = "<group>"; };
+		713E73D72BEC301C00CD79DD /* SensorDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorDataView.swift; sourceTree = "<group>"; };
+		71C26CB02BF3D1EE001E7D4C /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		B3140C452BD1E8810063724C /* LoginFrontend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginFrontend.swift; sourceTree = "<group>"; };
 		B3140C462BD1E8810063724C /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B3140C4C2BD1E96E0063724C /* http_handling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = http_handling.swift; sourceTree = "<group>"; };
@@ -93,6 +97,7 @@
 				B3140C4E2BD1EF320063724C /* HomeFrontend.swift */,
 				B3140C462BD1E8810063724C /* ContentView.swift */,
 				B3F42AF92BD5FD0000730759 /* SignUpView.swift */,
+				713E73D72BEC301C00CD79DD /* SensorDataView.swift */,
 			);
 			path = frontend;
 			sourceTree = "<group>";
@@ -101,6 +106,7 @@
 			isa = PBXGroup;
 			children = (
 				B3140C4C2BD1E96E0063724C /* http_handling.swift */,
+				71C26CB02BF3D1EE001E7D4C /* QRScannerView.swift */,
 			);
 			path = backend;
 			sourceTree = "<group>";
@@ -301,10 +307,12 @@
 			files = (
 				B3140C4F2BD1EF320063724C /* HomeFrontend.swift in Sources */,
 				B3140C482BD1E8810063724C /* ContentView.swift in Sources */,
+				71C26CB12BF3D1EE001E7D4C /* QRScannerView.swift in Sources */,
 				B36E60812B8566A900D56BA7 /* water_tap_appApp.swift in Sources */,
 				B3140C4D2BD1E96E0063724C /* http_handling.swift in Sources */,
 				B3F42AFA2BD5FD0000730759 /* SignUpView.swift in Sources */,
 				B3140C472BD1E8810063724C /* LoginFrontend.swift in Sources */,
+				713E73D82BEC301C00CD79DD /* SensorDataView.swift in Sources */,
 				336ED8762BE193DE00E7FED0 /* test.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -464,8 +472,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"water_tap_app/Preview Content\"";
+				DEVELOPMENT_TEAM = 8NYC2SU742;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "$(PRODUCT_NAME) Need Camera Access to Scan QR Code of Sensor to Register and Store Sensor ID to User Account";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -492,8 +502,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"water_tap_app/Preview Content\"";
+				DEVELOPMENT_TEAM = 8NYC2SU742;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "$(PRODUCT_NAME) Need Camera Access to Scan QR Code of Sensor to Register and Store Sensor ID to User Account";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
