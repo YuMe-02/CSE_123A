@@ -67,6 +67,54 @@ func http_register_sensor(jwt: String, sensor_id: String, sink_id: String, compl
     task.resume()
 }
 
+//Function to register new sensor
+func http_register_sensor(jwt: String, sensor_id: String, sink_id: String, completion: @escaping (Int?, String?, Error?) -> Void) {
+    let url = URL(string: "https://cse123-flowsensor-server.com/api/sensors/register")! // Corrected endpoint for login
+    var request = URLRequest(url: url)
+    request.httpMethod = "POST"
+    let parameters: [String: Any] = [
+        "sensor_id": sensor_id,
+        "sink_id": sink_id
+    ]
+    //add jwt
+    request.addValue("\(jwt)", forHTTPHeaderField: "x-access-token")
+    // Serialize dictionary into JSON data
+    guard let jsonData = try? JSONSerialization.data(withJSONObject: parameters) else {
+        completion(nil, nil, NSError(domain: "Serialization", code: -1, userInfo: nil)) // Return error code for failed serialization
+        return
+    }
+    // Set request body
+    request.httpBody = jsonData
+    
+    // Set request headers to indicate JSON content
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
+    let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        if let error = error {
+            completion(nil, nil, error) // Return error from URLSession error
+            return
+        }
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            completion(nil, nil, NSError(domain: "Response", code: -2, userInfo: nil)) // Return error for invalid response
+            return
+        }
+        do {
+            // make sure this JSON is in the format we expect
+            if let json = try JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String: Any] {
+                // try to read out a string array
+                let message = json["message"]
+                completion(httpResponse.statusCode, message as? String, nil)
+                }
+        } catch let error as NSError {
+            print("Failed to load: \(error.localizedDescription)")
+            completion(nil, nil, NSError(domain: "Response", code: -2, userInfo: nil))
+        }
+    }
+    
+    task.resume()
+}
+
 func http_login_user(email: String, password: String, completion: @escaping (Int?, String?, Error?) -> Void) {
     let url = URL(string: "https://cse123-flowsensor-server.com/login")! // Corrected endpoint for login
     var request = URLRequest(url: url)

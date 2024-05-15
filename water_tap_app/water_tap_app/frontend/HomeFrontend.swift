@@ -49,6 +49,41 @@ struct HomeView: View {
                         .padding()
                     Spacer()
                 }
+                .padding(.horizontal)
+                
+                .alert(isPresented: $showAlert) {
+                    Alert(title: Text(""), message: Text(responseMessage ?? ""), dismissButton: .default(Text("OK")))
+                }
+            }
+            .padding(20)
+            
+            Divider()
+            
+            Section(header: Text("**Request Data for Specific Day**")) {
+                DatePicker("Request Date", selection: $request_date, displayedComponents: .date)
+                    .padding()
+                    .datePickerStyle(DefaultDatePickerStyle())
+                TextField("Request Sink", text: $request_sink)
+                    .padding()
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+            Spacer()
+            }
+            .padding(5)
+            
+            Button(action: {
+                getData()
+                navigateToSensorDataView = true
+            }) {
+                Text("get Sensor Data")
+                    .padding()
+                    .foregroundColor(.white)
+                    .background(Color.blue)
+                    .cornerRadius(10)
+            }
+            .padding()
+            .sheet(isPresented: $navigateToSensorDataView) {
+                SensorDataView(jsonData: jsonData)
             }
             
                     
