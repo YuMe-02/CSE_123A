@@ -29,13 +29,14 @@ struct LoginView: View {
             //try to login or make a new user
             NavigationView {
                 VStack {
-                    TextField("Email", text: $email)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-                        .autocapitalization(.none)
-                        .onTapGesture {
+                    TextField("Email", text: $email, onEditingChanged: { editing in
+                        if editing {
                             self.email = ""
                         }
+                    })
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                    .autocapitalization(.none)
                     
                     SecureField("Password", text: $password)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -110,38 +111,3 @@ struct LoginView: View {
     }
 }
 
-enum Route {
-    case link1, link2
-}
-
-struct TestLogin: View {
-var body: some View{
-    NavigationStack {
-       NavigationLink("Link1", value: Route.link1)
-       NavigationLink("Link2", value: Route.link2)
-           .navigationDestination(for: Route.self) { route in
-               switch route {
-               case .link1:
-                   //https://sarunw.com/posts/hide-navigation-back-button-in-swiftui/
-                   Link1().navigationBarBackButtonHidden(true)
-               case .link2:
-                   Link2()
-               }
-           }
-       }
-   }
-}
-
-
-
-struct Link1: View {
-    var body: some View{
-        Text("You are in Link1 view")
-    }
-}
-
-struct Link2: View {
-    var body: some View{
-        Text("You are in Link2 view")
-    }
-}
