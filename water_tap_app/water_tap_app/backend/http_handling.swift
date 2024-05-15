@@ -247,3 +247,46 @@ func http_query_session(jwt: String, date: String, sinkid: String, completion: @
     task.resume()
 }
 
+func http_cummalative_data(jwt: String, completion: @escaping ([DateToData]) -> Void){
+    let endpoint = "https://cse123-flowsensor-server.com/api/user-data/graph"
+    print("The expected enpoint is: " + endpoint)
+    let url = URL(string: endpoint)!
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    request.addValue("\(jwt)", forHTTPHeaderField: "x-access-token")
+    var total_string: String = ""
+    var data_array = [DateToData]()
+    let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
+        guard let data = data else {
+            print("get request failed")
+            data_array = [DateToData]()
+            completion(data_array)
+            return
+        }
+        total_string = String(data: data, encoding: .utf8) ?? ""
+        if let jsonData = total_string.data(using: .utf8) {
+            do {
+                if let dictionary = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Double] {
+                    
+                    // Step 2: Extract dates and values
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "MM-dd-yyyy"
+                    for (key, value) in dictionary {
+                        if let date = dateFormatter.date(from: key) {
+                            data_array.append(DateToData(date: key,data: value))
+                        }
+                    }
+                    // Step 3: Sort and map the dates to their integer values
+                    completion(data_array) // Call completion handler with data string
+                }
+            } catch {
+                print("Error parsing JSON: \(error)")
+                data_array = [DateToData]()
+                completion(data_array)
+                return
+            }
+        }
+    }
+    task.resume()
+}
