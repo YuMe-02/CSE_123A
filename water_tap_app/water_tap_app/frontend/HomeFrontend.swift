@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import Charts
 
 struct HomeView: View {
     @State private var serialID: String = ""
@@ -57,6 +58,9 @@ struct HomeView: View {
             Divider()
             TileView(sinkLocation: $sinkLocation, serialID: $serialID, errorMessage: $errorMessage, showAlert: $showAlert, jwt_token: $jwt_token, responseMessage: $responseMessage, isShowingScanner: $isShowingScanner)
             
+            Divider()
+            GraphTileView(jwt_token: $jwt_token)
+            Divider()
             Spacer()
             
         }
@@ -88,6 +92,7 @@ struct DataRequestTileView: View {
             TextField("Sink Location", text: $request_sink)
                 .padding()
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
             
             Button(action: {
                 getData()
@@ -280,5 +285,66 @@ struct RegisterSensorView: View {
             }
             .padding(.top, 8)
         }
+    }
+}
+
+struct DateToData: Identifiable {
+    var date = ""
+    var data = 0.0
+    var id = UUID()
+}
+
+struct GraphTileView: View {
+   
+    
+    @Binding var jwt_token: String
+    
+    @State private var request_date = Date()
+    @State private var loading_graph = false
+    @State private var default_str = "Loading Graph..."
+    @State private var trend_data = [DateToData]()
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Graph of the Past Week")
+                .font(.headline)
+                .padding(.bottom, 8)
+                .foregroundStyle(.black)
+            
+            if(!loading_graph){
+                Text(default_str)
+            } else{
+                Chart {
+                    ForEach(trend_data) { data_pair in
+                        LineMark(
+                            x: .value("Day", data_pair.date),
+                            y: .value("Total Water Usage", data_pair.data)
+                        )
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(8)
+        .padding()
+        .onAppear{
+                http_cummalative_data(jwt: jwt_token){
+                    created_data in
+                    if(created_data.isEmpty){
+                        loading_graph = false
+                    } else{
+                        loading_graph = true
+                        trend_data = created_data
+                    }
+                }
+            }
+    }
+   
+    
+    func convertDateToString(date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd" // Choose the appropriate date format
+        return dateFormatter.string(from: date)
     }
 }
