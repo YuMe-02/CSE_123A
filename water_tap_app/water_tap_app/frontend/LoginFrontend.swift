@@ -29,11 +29,7 @@ struct LoginView: View {
             //try to login or make a new user
             NavigationView {
                 VStack {
-                    TextField("Email", text: $email, onEditingChanged: { editing in
-                        if editing {
-                            self.email = ""
-                        }
-                    })
+                    TextField("Email", text: $email)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                     .autocapitalization(.none)
