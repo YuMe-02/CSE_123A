@@ -49,41 +49,6 @@ struct HomeView: View {
                         .padding()
                     Spacer()
                 }
-                .padding(.horizontal)
-                
-                .alert(isPresented: $showAlert) {
-                    Alert(title: Text(""), message: Text(responseMessage ?? ""), dismissButton: .default(Text("OK")))
-                }
-            }
-            .padding(20)
-            
-            Divider()
-            
-            Section(header: Text("**Request Data for Specific Day**")) {
-                DatePicker("Request Date", selection: $request_date, displayedComponents: .date)
-                    .padding()
-                    .datePickerStyle(DefaultDatePickerStyle())
-                TextField("Request Sink", text: $request_sink)
-                    .padding()
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                
-            Spacer()
-            }
-            .padding(5)
-            
-            Button(action: {
-                getData()
-                navigateToSensorDataView = true
-            }) {
-                Text("get Sensor Data")
-                    .padding()
-                    .foregroundColor(.white)
-                    .background(Color.blue)
-                    .cornerRadius(10)
-            }
-            .padding()
-            .sheet(isPresented: $navigateToSensorDataView) {
-                SensorDataView(jsonData: jsonData)
             }
             
                     
@@ -95,7 +60,6 @@ struct HomeView: View {
             
             Divider()
             GraphTileView(jwt_token: $jwt_token)
-            Divider()
             Spacer()
             
         }
@@ -127,7 +91,6 @@ struct DataRequestTileView: View {
             TextField("Sink Location", text: $request_sink)
                 .padding()
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
             
             Button(action: {
                 getData()
@@ -322,7 +285,6 @@ struct RegisterSensorView: View {
         }
     }
 }
-
 struct DateToData: Identifiable {
     var date = ""
     var data = 0.0
@@ -351,7 +313,7 @@ struct GraphTileView: View {
             } else{
                 Chart {
                     ForEach(trend_data) { data_pair in
-                        LineMark(
+                        BarMark(
                             x: .value("Day", data_pair.date),
                             y: .value("Total Water Usage", data_pair.data)
                         )
@@ -383,3 +345,6 @@ struct GraphTileView: View {
         return dateFormatter.string(from: date)
     }
 }
+
+
+
