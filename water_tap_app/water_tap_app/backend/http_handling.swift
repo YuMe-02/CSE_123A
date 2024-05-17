@@ -248,7 +248,7 @@ func http_query_session(jwt: String, date: String, sinkid: String, completion: @
 }
 
 func http_cummalative_data(jwt: String, completion: @escaping ([DateToData]) -> Void){
-    let endpoint = "https://cse123-flowsensor-server.com/api/user-data/graph"
+    let endpoint = "https://cse123-flowsensor-server.com/api/user-data/graph?date=2024-05-15"
     print("The expected enpoint is: " + endpoint)
     let url = URL(string: endpoint)!
     var request = URLRequest(url: url)

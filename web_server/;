@@ -1,6 +1,6 @@
 import psycopg2
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from dotenv import load_dotenv
 
 def conn_db():
@@ -106,50 +106,25 @@ def init_key_db():
     conn.commit()
     conn.close()
 
-def query_n_replace_graph_db(reading, sensor_id, date):
+def query_n_replace_graph_db(reading, user_id, date):
     cur, conn = conn_db()
-    cur.execute("""SELECT DISTINCT user_id
-                    FROM sensors
-                    WHERE sensor_id = %s""", (sensor_id,))
-    user_id = cur.fetchall()
-    conn.commit()
     cur.execute("""SELECT cum_sum 
-                    FROM graph_data 
+                    FROM graph_data
                     WHERE user_id = %s
-                    AND date = %s""", (user_id[0], date))
+                    AND date = %s""", (user_id, date))
     
     data = cur.fetchall()
     if len(data) == 0:
-        cur.execute("""INSERT INTO graph_data (user_id, cum_sum, date)
-                        VALUES (%s, %s, %s)""", (user_id[0], reading, date))
-    else:
-        cur.execute("""UPDATE graph_data SET cum_sum = %s
-                        WHERE user_id = %s
-                        AND date = %s""", ((reading + float(data[0][0])), user_id[0], date))
-    conn.commit()
-    conn.close()
+        #make new entry with reading being data point
+        conn.commit()
+        conn.close()
+        return reading
 
+    #cumm_sum + reading -> replace in db
 
 def query_graph_7day(user_id, date):
     #fetch past 7 days worth of cumm_sum data, if no date present in 7 days fill it with 0?
-    cur, conn = conn_db()
-    data_dict = {}
-    date_obj = datetime.strptime(date, "%Y-%m-%d")
-    for i in range(1,8):
-        previous_date = date_obj - timedelta(days=i)
-        previous_date_str = previous_date.strftime('%m-%d-%Y')
-        cur.execute("""SELECT cum_sum 
-                        FROM graph_data
-                        WHERE user_id = %s
-                        AND date = %s""", (user_id, previous_date_str))
-        data = cur.fetchall()
-        if len(data) == 0:
-            data_dict[previous_date_str] = 0
-        else:
-            data_dict[previous_date_str] = float(data[0][0])
-
-    return data_dict
-
+    
 
 
 def insert_sensor_db(user_id, sensor_id, sink_id):

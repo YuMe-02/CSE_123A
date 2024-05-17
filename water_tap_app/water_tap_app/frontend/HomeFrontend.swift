@@ -58,9 +58,10 @@ struct HomeView: View {
             Divider()
             TileView(sinkLocation: $sinkLocation, serialID: $serialID, errorMessage: $errorMessage, showAlert: $showAlert, jwt_token: $jwt_token, responseMessage: $responseMessage, isShowingScanner: $isShowingScanner)
             
+            Spacer()
+            
             Divider()
             GraphTileView(jwt_token: $jwt_token)
-            Spacer()
             
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -104,7 +105,7 @@ struct DataRequestTileView: View {
             }
             .padding()
             .sheet(isPresented: $navigateToSensorDataView) {
-                SensorDataView(jsonData: jsonData)
+                SensorDataView(jsonData: jsonData, date: dateAsString)
             }
     
         }
@@ -120,8 +121,6 @@ struct DataRequestTileView: View {
             print("No sink Specified")
             return
         }
-        print(dateAsString)
-        print(request_sink)
         http_query_session(jwt: jwt_token, date: dateAsString, sinkid: request_sink){
             response in
             DispatchQueue.main.async {
@@ -136,7 +135,6 @@ struct DataRequestTileView: View {
         return dateFormatter.string(from: date)
     }
 }
-
 
 //FOR TESTING
 struct TileView: View {
@@ -207,6 +205,8 @@ struct UnregisterSensorView: View {
     }
 }
 
+import SwiftUI
+
 struct RegisterSensorView: View {
     @Binding var sinkLocation: String
     @Binding var serialID: String
@@ -215,6 +215,8 @@ struct RegisterSensorView: View {
     @Binding var jwt_token: String
     @Binding var responseMessage: String?
     @Binding var isShowingScanner: Bool
+    @State private var isSerialIDCaptured: Bool = false
+    @State private var isSuccess: Bool = false
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -223,68 +225,92 @@ struct RegisterSensorView: View {
                 .padding(.bottom, 8)
                 .foregroundStyle(.black)
             
-            //TextField("Sensor ID", text: $serialID)
-            //    .padding()
-            //    .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            //TESTING QR CODE SCANNER
-            Button("Scan QR Code") {
-                isShowingScanner = true
-            }
-            .padding()
-            .sheet(isPresented: $isShowingScanner) {
-                QRScannerView(didFindCode: { code in
-                    if let data = code.data(using: .utf8),
-                       let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
-                       let scannedSerialID = json["serialID"] {
-                        self.serialID = scannedSerialID
-                    } else {
-                        self.serialID = code
-                    }
-                    self.isShowingScanner = false
-                })
-            }
-            
-            TextField("Location", text: $sinkLocation)
-                .padding()
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-            
-            Button(action: {
-                // Check if text fields are empty
-                guard !serialID.isEmpty, !sinkLocation.isEmpty else {
-                    errorMessage = "Please fill in both text fields"
-                    showAlert = true
-                    return
+            if !isSerialIDCaptured {
+                Button("Scan QR Code") {
+                    isShowingScanner = true
                 }
+                .padding()
+                .sheet(isPresented: $isShowingScanner) {
+                    QRScannerView(didFindCode: { code in
+                        if let data = code.data(using: .utf8),
+                           let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: String],
+                           let scannedSerialID = json["serialID"] {
+                            self.serialID = scannedSerialID
+                        } else {
+                            self.serialID = code
+                        }
+                        self.isSerialIDCaptured = true
+                        self.isShowingScanner = false
+                    })
+                }
+            } else {
+                TextField("Serial ID", text: $serialID)
+                    .padding()
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .disabled(true)
                 
-                // Call the backend function to register the sensor
-                http_register_sensor(jwt: jwt_token, sensor_id: serialID, sink_id: sinkLocation) { statusCode, message, error in
-                    if let error = error {
-                        // Handle error
-                        print("Error: \(error.localizedDescription)")
-                    } else if let statusCode = statusCode {
-                        // Handle success
-                        print("Status Code: \(statusCode)")
-                        if let message = message {
-                            // Update UI with message
-                            print("Message: \(message)")
-                            // Update UI with the response message
-                            responseMessage = message
-                            showAlert = true
+                TextField("Location", text: $sinkLocation)
+                    .padding()
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                Button(action: {
+                    // Check if text fields are empty
+                    guard !serialID.isEmpty, !sinkLocation.isEmpty else {
+                        errorMessage = "Please fill in both text fields"
+                        showAlert = true
+                        return
+                    }
+                    
+                    // Call the backend function to register the sensor
+                    http_register_sensor(jwt: jwt_token, sensor_id: serialID, sink_id: sinkLocation) { statusCode, message, error in
+                        if let error = error {
+                            // Handle error
+                            print("Error: \(error.localizedDescription)")
+                        } else if let statusCode = statusCode {
+                            // Handle success
+                            print("Status Code: \(statusCode)")
+                            if let message = message {
+                                // Update UI with message
+                                print("Message: \(message)")
+                                // Update UI with the response message
+                                responseMessage = message
+                                self.isSuccess = (statusCode == 201)
+                                
+                                if self.isSuccess {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                        self.resetView()
+                                    }
+                                }
+                            }
                         }
                     }
+                }) {
+                    Text("Register")
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(8)
                 }
-            }) {
-                Text("Register")
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.blue)
-                    .cornerRadius(8)
+                .padding(.top, 8)
+                
+                if let responseMessage = responseMessage, isSuccess {
+                    Text(responseMessage)
+                        .foregroundColor(.green)
+                        .padding(.top, 8)
+                }
             }
-            .padding(.top, 8)
         }
     }
+    private func resetView() {
+        self.isSerialIDCaptured = false
+        self.serialID = ""
+        self.sinkLocation = ""
+        self.responseMessage = nil
+        self.isSuccess = false
+    }
 }
+
+
 struct DateToData: Identifiable {
     var date = ""
     var data = 0.0
@@ -303,7 +329,7 @@ struct GraphTileView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Graph of the Past Week")
+            Text("Water Usage Over Past Week")
                 .font(.headline)
                 .padding(.bottom, 8)
                 .foregroundStyle(.black)
@@ -337,6 +363,7 @@ struct GraphTileView: View {
                 }
             }
     }
+    
    
     
     func convertDateToString(date: Date) -> String {

@@ -1,6 +1,7 @@
 import SwiftUI
 
-struct SessionData {
+struct SessionData: Identifiable {
+    let id = UUID()
     let sessionID: String
     let sinkID: String
     let sensorID: String
@@ -11,14 +12,45 @@ struct SessionData {
     let date: String
 }
 
+
+struct SessionTile: View {
+    let session: SessionData
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("\(session.startTime) - \(session.endTime)")
+                    .font(.headline)
+                    .padding(.bottom, 4)
+                Spacer()
+            }
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("**Location**: \(session.sinkID)")
+                    Text("**Sensor Number** \(session.sensorID)")
+                    Text("**Water Amount**: \(session.waterAmount)")
+                    Text("**Session Duration**: \(session.duration)")
+                }
+                Spacer()
+            }
+        }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(10)
+    }
+}
+
 struct SensorDataView: View {
     let jsonData: String
+    let date: String
     
-    var sessionData: [SessionData] {
+    private var sessionData: [SessionData] {
         var sessions = [SessionData]()
         
         // Removing brackets and splitting into individual session strings
         let sessionStrings = jsonData.replacingOccurrences(of: "[{", with: "").replacingOccurrences(of: "}]", with: "").split(separator: "}, {")
+        
+        print(jsonData)
         
         // Parsing each session string
         for sessionString in sessionStrings {
@@ -68,23 +100,22 @@ struct SensorDataView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            ForEach(sessionData, id: \.sessionID) { session in
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("Session ID: \(session.sessionID)")
-                    Text("Sink ID: \(session.sinkID)")
-                    Text("Sensor ID: \(session.sensorID)")
-                    Text("Water Amount: \(session.waterAmount)")
-                    Text("Duration: \(session.duration)")
-                    Text("Start Time: \(session.startTime)")
-                    Text("End Time: \(session.endTime)")
-                    Text("Date: \(session.date)")
+        ScrollView {
+            VStack(spacing: 20) {
+                HStack {
+                    Text("Sink Usage Sessions for: ")
+                        .bold()
+                    Text(date)
+                        .bold()
                 }
-                .padding()
-                .border(Color.gray)
+                .padding(.top)
+                ForEach(sessionData) { session in
+                    SessionTile(session: session)
+                }
             }
+            .padding()
         }
-        .padding()
+        .background(Color.white)
+        .edgesIgnoringSafeArea(.all)
     }
 }
-

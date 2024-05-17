@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, abort, make_response
-from db import drop_all_db, init_user_db, init_db, init_key_db, init_sensor_db, insert_sensor_db, insert_db, insert_user_db, query_sensor_db, request_db, query_apiauth_by_key, replace_key, query_user_db, query_user_email
+from db import drop_all_db, init_graph_db, init_user_db, init_db, init_key_db, del_sensor_db, init_sensor_db, insert_sensor_db, insert_db, insert_user_db, query_sensor_db, request_db, query_apiauth_by_key, replace_key, query_user_db, query_user_email, query_n_replace_graph_db, query_graph_7day
 from functools import wraps
 from datetime import datetime, timedelta
 from keygen import gen_api_key
@@ -22,11 +22,12 @@ secret_key = os.environ['JWT_SECRET_KEY']
 app.config['SECRET_KEY'] = secret_key
 
 #database initializations
-drop_all_db()
+#drop_all_db()
 init_user_db()
 init_sensor_db()
 init_db()
 init_key_db()
+init_graph_db()
 
 global_password = None
 
@@ -115,6 +116,7 @@ def index():
 def send_data():
     reiss = False
     api_key = request.json['api_key']
+    print(api_key)
     query_resp = query_apiauth_by_key(api_key)
     if(query_resp[0] == False):
         data = {
@@ -130,23 +132,31 @@ def send_data():
     start_time = request.json['start_time']
     end_time = request.json['end_time']
     date = request.json['date']
-    is_error = request.json['is_error']
 
-    insert_db('sessions', "test-user", session_id, sink_id, sensor_id, water_amount, duration, start_time, end_time, date, is_error)
+    insert_db('sessions', session_id, sink_id, sensor_id, water_amount, duration, start_time, end_time, date)
 
-    if ((datetime.strptime(date, '%Y-%m-%d').date() - query_resp[1]) >= timedelta(days=7)):
-        reiss = True
+    query_n_replace_graph_db(water_amount, sensor_id, date)
+    
 
-    if (reiss):
-        new_key = gen_api_key()
-        replace_key(api_key, new_key, date)
+    #MIGHT REMOVE NOT NEEDED ATM
+    #--------------------------------------------------------------------------------------
+    #if ((datetime.strptime(date, '%Y-%m-%d').date() - query_resp[1]) >= timedelta(days=365)):
+    #    reiss = True
 
-        data = {
-            "api_key": new_key,
-            "Response": "Successful"
-        }
-    else:
-        data = {
+    #if (reiss):
+    #    new_key = gen_api_key()
+    #    replace_key(api_key, new_key, date)
+
+    #    data = {
+    #        "api_key": new_key,
+    #        "Response": "Successful"
+    #    }
+    #else:
+    #    data = {
+    #        "Response": "Successful"
+    #    }
+
+    data = {
             "Response": "Successful"
         }
 
@@ -155,7 +165,7 @@ def send_data():
 #receive-data route, sends data to phone given date
 @app.route('/api/user-data', methods=['GET'])
 @token_required
-def receive_data():
+def receive_data(current_user):
     session_ids = []
     sink_ids = []
     sensor_ids = []
@@ -164,10 +174,10 @@ def receive_data():
     start_times = []
     end_times = []
     dates = []
-    is_errors = []
 
     date = request.args.get('date')
-    data = request_db(date)
+    sink_id = request.args.get('sink_id')
+    data = request_db(date, sink_id, current_user)
     for i in range(len(data)):
         session_ids.append(str(data[i][0]))
         sink_ids.append(str(data[i][1]))
@@ -177,8 +187,6 @@ def receive_data():
         start_times.append(data[i][5].strftime("%H:%M:%S"))
         end_times.append(data[i][6].strftime("%H:%M:%S"))
         dates.append(data[i][7].strftime("%m/%d/%Y"))
-        is_errors.append(str(data[i][8]))
-    print(session_ids, sink_ids, sensor_ids, water_amounts, durations, start_times, end_times, dates, is_errors)
     data_packets = []
     for i in range(len(session_ids)):
         data_packet = {
@@ -190,12 +198,21 @@ def receive_data():
             "start time": start_times[i],
             "end time": end_times[i],
             "date": dates[i],
-            "is error": is_errors[i]
         }
         data_packets.append(data_packet)
     json_data = json.dumps(data_packets)
 
     return json_data, 200
+
+@app.route('/api/user-data/graph', methods=['GET'])
+@token_required
+def data_graph(current_user):
+
+    #query graph 7 day with date and user id, return 7 day json cumm sum data
+    date = request.args.get('date')
+    graph_data = query_graph_7day(current_user, date)
+    print(graph_data)
+    return jsonify(graph_data), 200
 
 @app.route('/api/iphone-test', methods=['GET'])
 def iphone_test():
@@ -269,19 +286,29 @@ def signup():
         # returns 202 if user already exists
         return make_response('User already exists. Please Log in.', 202)
 
-@app.route('/sensors', methods=['POST'])
+@app.route('/api/sensors/register', methods=['POST'])
 @token_required
 def validate_sensor(current_user):
     sensor_id, sink_id = request.json['sensor_id'], request.json['sink_id']
+    print(sensor_id, sink_id)
     #insert into database
-    if_already_exists = query_sensor_db(current_user, sink_id)
-    if not if_already_exists:
-        return make_response('Sensor already exists.', 202)
+    if_already_exists = query_sensor_db(current_user, sensor_id)
+    if if_already_exists:
+        return jsonify({'message': 'Sensor already registered'}), 409
     insert_sensor_db(current_user, sensor_id, sink_id)
-    return make_response('Sensor successfully registered.', 201)
-    #print(current_user)
-    return('Success?', 200)
+    return jsonify({'message': 'Sensor registered successfully'}), 201
 
+@app.route('/api/sensors/deregister', methods=['DELETE'])
+@token_required
+def deregister_sensor(current_user):
+    #check if sensor id is in the database
+    sensor_id = request.args.get('sensor_id')
+    if_already_exists = query_sensor_db(current_user, sensor_id)
+    if if_already_exists:
+        del_sensor_db(current_user, sensor_id)
+        return jsonify({'message': 'Sensor removed successfully'}), 201
+    else:
+        return jsonify({'message': 'Sensor does not exists'}), 409
 
 @app.route('/post-echo', methods=['POST'])
 def post_echo():
