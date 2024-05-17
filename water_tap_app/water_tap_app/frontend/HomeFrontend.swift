@@ -22,7 +22,6 @@ struct HomeView: View {
     @State private var currentTab = 0
     @State private var isShowingScanner = false
     
-    
     @Binding var jwt_token: String
     
     var greeting: String {
@@ -33,40 +32,41 @@ struct HomeView: View {
         case 0..<12:
             return "Good Morning!"
         case 12..<18:
-            return "Good afternoon!"
+            return "Good Afternoon!"
         default:
-            return "Good evening!"
+            return "Good Evening!"
         }
     }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                Spacer()
-                HStack {
-                    Text(greeting + "👋")
-                        .font(.title)
-                        .padding()
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
                     Spacer()
-                }
-            }
-            
+                    HStack {
+                        Text(greeting + "👋")
+                            .font(.title)
+                            .padding()
+                        Spacer()
+                    }
                     
-            DataRequestTileView(request_sink: $request_sink, navigateToSensorDataView: $navigateToSensorDataView, jsonData: $jsonData, dateAsString: $dateAsString, jwt_token: $jwt_token)
-            //SensorRegistrationTileView(serialID: $serialID, sinkLocation: $sinkLocation, errorMessage: $errorMessage, showAlert: $showAlert, jwt_token: $jwt_token, responseMessage: $responseMessage)
-        
-            Divider()
-            TileView(sinkLocation: $sinkLocation, serialID: $serialID, errorMessage: $errorMessage, showAlert: $showAlert, jwt_token: $jwt_token, responseMessage: $responseMessage, isShowingScanner: $isShowingScanner)
-            
-            Spacer()
-            
-            Divider()
-            GraphTileView(jwt_token: $jwt_token)
-            
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGray6))
-        .edgesIgnoringSafeArea(.all)
+                    DataRequestTileView(request_sink: $request_sink, navigateToSensorDataView: $navigateToSensorDataView, jsonData: $jsonData, dateAsString: $dateAsString, jwt_token: $jwt_token)
+                    //SensorRegistrationTileView(serialID: $serialID, sinkLocation: $sinkLocation, errorMessage: $errorMessage, showAlert: $showAlert, jwt_token: $jwt_token, responseMessage: $responseMessage)
+                
+                    Divider()
+                    TileView(sinkLocation: $sinkLocation, serialID: $serialID, errorMessage: $errorMessage, showAlert: $showAlert, jwt_token: $jwt_token, responseMessage: $responseMessage, isShowingScanner: $isShowingScanner)
+                    
+                    Divider()
+                    GraphTileView(jwt_token: $jwt_token)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.systemGray6))
+                .edgesIgnoringSafeArea(.all)
+                .navigationBarHidden(true)  // Hides the navigation bar completely
+            }
+            .navigationBarTitle("Home", displayMode: .inline)
+            .navigationBarBackButtonHidden(true)
+        } .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 
@@ -78,6 +78,7 @@ struct DataRequestTileView: View {
     @Binding var jwt_token: String
     
     @State private var request_date = Date()
+    
     var body: some View {
         VStack(alignment: .leading) {
             Text("Request Data from a Sensor")
@@ -92,7 +93,8 @@ struct DataRequestTileView: View {
             TextField("Sink Location", text: $request_sink)
                 .padding()
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-            
+                .autocapitalization(.none)
+
             Button(action: {
                 getData()
                 navigateToSensorDataView = true
@@ -107,7 +109,6 @@ struct DataRequestTileView: View {
             .sheet(isPresented: $navigateToSensorDataView) {
                 SensorDataView(jsonData: jsonData, date: dateAsString)
             }
-    
         }
         .padding()
         .background(Color.white)
@@ -117,12 +118,11 @@ struct DataRequestTileView: View {
     
     func getData() {
         dateAsString = convertDateToString(date: request_date)
-        if request_sink.isEmpty{
-            print("No sink Specified")
+        if request_sink.isEmpty {
+            print("No sink specified")
             return
         }
-        http_query_session(jwt: jwt_token, date: dateAsString, sinkid: request_sink){
-            response in
+        http_query_session(jwt: jwt_token, date: dateAsString, sinkid: request_sink) { response in
             DispatchQueue.main.async {
                 jsonData = response
             }
@@ -136,7 +136,6 @@ struct DataRequestTileView: View {
     }
 }
 
-//FOR TESTING
 struct TileView: View {
     @Binding var sinkLocation: String
     @Binding var serialID: String
@@ -177,19 +176,20 @@ struct UnregisterSensorView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Text("Un-Register Sensor")
+            Text("Unregister Sensor")
                 .font(.headline)
                 .padding(.bottom, 8)
                 .foregroundStyle(.black)
             
-                .foregroundColor(.black)
             TextField("Sensor ID", text: $serialID)
                 .padding()
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
             
             TextField("Location", text: $sinkLocation)
                 .padding()
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .autocapitalization(.none)
             
             Button(action: {
                 // Add action for unregister button
@@ -204,8 +204,6 @@ struct UnregisterSensorView: View {
         }
     }
 }
-
-import SwiftUI
 
 struct RegisterSensorView: View {
     @Binding var sinkLocation: String
@@ -248,10 +246,12 @@ struct RegisterSensorView: View {
                     .padding()
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .disabled(true)
-                
+                    .autocapitalization(.none)
+
                 TextField("Location", text: $sinkLocation)
                     .padding()
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .autocapitalization(.none)
                 
                 Button(action: {
                     // Check if text fields are empty
@@ -301,6 +301,7 @@ struct RegisterSensorView: View {
             }
         }
     }
+    
     private func resetView() {
         self.isSerialIDCaptured = false
         self.serialID = ""
@@ -310,7 +311,6 @@ struct RegisterSensorView: View {
     }
 }
 
-
 struct DateToData: Identifiable {
     var date = ""
     var data = 0.0
@@ -318,8 +318,6 @@ struct DateToData: Identifiable {
 }
 
 struct GraphTileView: View {
-   
-    
     @Binding var jwt_token: String
     
     @State private var request_date = Date()
@@ -334,9 +332,9 @@ struct GraphTileView: View {
                 .padding(.bottom, 8)
                 .foregroundStyle(.black)
             
-            if(!loading_graph){
+            if !loading_graph {
                 Text(default_str)
-            } else{
+            } else {
                 Chart {
                     ForEach(trend_data) { data_pair in
                         BarMark(
@@ -351,20 +349,17 @@ struct GraphTileView: View {
         .background(Color.white)
         .cornerRadius(8)
         .padding()
-        .onAppear{
-                http_cummalative_data(jwt: jwt_token){
-                    created_data in
-                    if(created_data.isEmpty){
-                        loading_graph = false
-                    } else{
-                        loading_graph = true
-                        trend_data = created_data
-                    }
+        .onAppear {
+            http_cummalative_data(date_string: convertDateToString(date: request_date),jwt: jwt_token) { created_data in
+                if created_data.isEmpty {
+                    loading_graph = false
+                } else {
+                    loading_graph = true
+                    trend_data = created_data
                 }
             }
+        }
     }
-    
-   
     
     func convertDateToString(date: Date) -> String {
         let dateFormatter = DateFormatter()
@@ -372,6 +367,3 @@ struct GraphTileView: View {
         return dateFormatter.string(from: date)
     }
 }
-
-
-

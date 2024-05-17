@@ -247,8 +247,8 @@ func http_query_session(jwt: String, date: String, sinkid: String, completion: @
     task.resume()
 }
 
-func http_cummalative_data(jwt: String, completion: @escaping ([DateToData]) -> Void){
-    let endpoint = "https://cse123-flowsensor-server.com/api/user-data/graph?date=2024-05-15"
+func http_cummalative_data(date_string: String, jwt: String, completion: @escaping ([DateToData]) -> Void){
+    let endpoint = "https://cse123-flowsensor-server.com/api/user-data/graph?date=" + date_string
     print("The expected enpoint is: " + endpoint)
     let url = URL(string: endpoint)!
     var request = URLRequest(url: url)
@@ -265,6 +265,7 @@ func http_cummalative_data(jwt: String, completion: @escaping ([DateToData]) -> 
             return
         }
         total_string = String(data: data, encoding: .utf8) ?? ""
+        print("String from server is: " + total_string)
         if let jsonData = total_string.data(using: .utf8) {
             do {
                 if let dictionary = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Double] {
@@ -277,7 +278,14 @@ func http_cummalative_data(jwt: String, completion: @escaping ([DateToData]) -> 
                             data_array.append(DateToData(date: key,data: value))
                         }
                     }
-                    // Step 3: Sort and map the dates to their integer values
+                    // Sort the array by date in descending order
+                   data_array.sort {
+                       let dateFormatter = DateFormatter()
+                       dateFormatter.dateFormat = "MM-dd-yyyy"
+                       let date1 = dateFormatter.date(from: $0.date) ?? Date.distantPast
+                       let date2 = dateFormatter.date(from: $1.date) ?? Date.distantPast
+                       return date1 > date2
+                   }
                     completion(data_array) // Call completion handler with data string
                 }
             } catch {

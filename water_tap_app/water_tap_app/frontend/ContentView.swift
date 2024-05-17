@@ -9,7 +9,11 @@ import SwiftUI
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        TestView()
+        //username: tikraeme@ucsc.edu
+        //password: Password123!
+        //id: kitchen
+        //date: May 17
+        LoginView()
     }
 }
 
