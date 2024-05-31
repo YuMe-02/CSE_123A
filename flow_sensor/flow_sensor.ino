@@ -12,7 +12,7 @@ const char* mqttServer = "192.168.137.13";
 const int mqttPort = 1883;
 int count = 0;
 float saved;
-int wifi_led = D5;
+int wifi_led = D8;
 int power_led = D7;
 
 WiFiClient espClient;
