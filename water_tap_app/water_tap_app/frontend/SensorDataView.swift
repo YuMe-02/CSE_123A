@@ -96,7 +96,7 @@ struct SensorDataView: View {
             sessions.append(SessionData(sessionID: sessionID, sinkID: sinkID, sensorID: sensorID, waterAmount: waterAmount, duration: duration, startTime: startTime, endTime: endTime, date: date))
         }
         
-        return sessions
+        return sessions.sorted { $0.startTime > $1.startTime }
     }
     
     var body: some View {

@@ -241,7 +241,7 @@ func http_query_session(jwt: String, date: String, sinkid: String, completion: @
             return
         }
         empty_string = String(data: data, encoding: .utf8) ?? ""
-        //print(empty_string)
+        print(empty_string)
         completion(empty_string) // Call completion handler with data string
     }
     task.resume()
@@ -249,7 +249,7 @@ func http_query_session(jwt: String, date: String, sinkid: String, completion: @
 
 func http_cummalative_data(date_string: String, jwt: String, completion: @escaping ([DateToData]) -> Void){
     let endpoint = "https://cse123-flowsensor-server.com/api/user-data/graph?date=" + date_string
-    print("The expected enpoint is: " + endpoint)
+    //print("The expected enpoint is: " + endpoint)
     let url = URL(string: endpoint)!
     var request = URLRequest(url: url)
     request.httpMethod = "GET"

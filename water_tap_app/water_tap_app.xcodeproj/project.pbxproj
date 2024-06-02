@@ -95,8 +95,8 @@
 				B3140C452BD1E8810063724C /* LoginFrontend.swift */,
 				336ED8752BE193DE00E7FED0 /* test.swift */,
 				B3140C462BD1E8810063724C /* ContentView.swift */,
-				B3140C4E2BD1EF320063724C /* HomeFrontend.swift */,
 				B3F42AF92BD5FD0000730759 /* SignUpView.swift */,
+				B3140C4E2BD1EF320063724C /* HomeFrontend.swift */,
 				713E73D72BEC301C00CD79DD /* SensorDataView.swift */,
 			);
 			path = frontend;
