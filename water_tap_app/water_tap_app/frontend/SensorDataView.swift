@@ -78,9 +78,9 @@ struct SensorDataView: View {
                     case "sensor ID":
                         sensorID = value
                     case "water amount":
-                        waterAmount = value
+                        waterAmount = value + "L"
                     case "duration":
-                        duration = value
+                        duration = value + " sec"
                     case "start time":
                         startTime = value
                     case "end time":
