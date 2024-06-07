@@ -241,7 +241,7 @@ func http_query_session(jwt: String, date: String, sinkid: String, completion: @
             return
         }
         empty_string = String(data: data, encoding: .utf8) ?? ""
-        print(empty_string)
+        //print(empty_string)
         completion(empty_string) // Call completion handler with data string
     }
     task.resume()
