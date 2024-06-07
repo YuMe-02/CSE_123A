@@ -125,7 +125,7 @@ def query_n_replace_graph_db(reading, sensor_id, date):
     else:
         cur.execute("""UPDATE graph_data SET cum_sum = %s
                         WHERE user_id = %s
-                        AND date = %s""", ((reading + float(data[0][0])), user_id[0], date))
+                        AND date = %s""", ((float(reading) + float(data[0][0])), user_id[0], date))
     conn.commit()
     conn.close()
 
@@ -185,6 +185,15 @@ def del_sensor_db(user_id, sensor_id):
     conn.commit()
     conn.close()
 
+def query_sensor_db_for_sinks(user_id):
+    cur, conn = conn_db()
+    cur.execute("""SELECT sensor_id, sink_id FROM sensors s
+                WHERE s.user_id = %s""", (user_id,))
+    data = cur.fetchall()
+
+    conn.commit()
+    conn.close()
+    return data
 
 def insert_db(sessions, session_id, sink_id, sensor_id, water_amount, duration, start_time, end_time, date):
     cur, conn = conn_db()
@@ -211,9 +220,10 @@ def insert_db(sessions, session_id, sink_id, sensor_id, water_amount, duration, 
 def request_db(date, sink_id, current_user):
     cur, conn = conn_db()
 
-    cur.execute("""SELECT * FROM sessions s, users u, sensors se
+    cur.execute("""SELECT DISTINCT * FROM sessions s
+                    JOIN sensors se ON s.sensor_id = se.sensor_id
+                    JOIN users u ON u.public_id = se.user_id
                     WHERE s.date=%s
-                    AND s.sensor_id=se.sensor_id
                     AND se.user_id=%s
                     AND s.sink_id = %s""", (date, current_user, sink_id))
     mobile_records = cur.fetchall()

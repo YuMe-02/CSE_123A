@@ -116,7 +116,6 @@ def index():
 def send_data():
     reiss = False
     api_key = request.json['api_key']
-    print(api_key)
     query_resp = query_apiauth_by_key(api_key)
     if(query_resp[0] == False):
         data = {
@@ -125,13 +124,15 @@ def send_data():
         return data, 403
 
     session_id = request.json['session_id']
-    sink_id = request.json['sink_id']
+    sink_id = request.json['sink_id'].strip()
     sensor_id = request.json['sensor_id']
     water_amount = request.json['water_amount']
     duration = request.json['duration']
     start_time = request.json['start_time']
     end_time = request.json['end_time']
     date = request.json['date']
+
+    print(date)
 
     insert_db('sessions', session_id, sink_id, sensor_id, water_amount, duration, start_time, end_time, date)
 
@@ -178,6 +179,7 @@ def receive_data(current_user):
     date = request.args.get('date')
     sink_id = request.args.get('sink_id')
     data = request_db(date, sink_id, current_user)
+    print(data)
     for i in range(len(data)):
         session_ids.append(str(data[i][0]))
         sink_ids.append(str(data[i][1]))
@@ -191,7 +193,7 @@ def receive_data(current_user):
     for i in range(len(session_ids)):
         data_packet = {
             "session ID": session_ids[i],
-            "sink ID": sink_ids[i],
+            "sink ID": sink_ids[i].strip(),
             "sensor ID": sensor_ids[i],
             "water amount": water_amounts[i],
             "duration": durations[i],
@@ -213,6 +215,20 @@ def data_graph(current_user):
     graph_data = query_graph_7day(current_user, date)
     print(graph_data)
     return jsonify(graph_data), 200
+
+@app.route('/api/user-data/registered-sinks', methods=['GET'])
+@token_required
+def get_sinks(current_user):
+    data = query_sensor_db_for_sinks(current_user)
+    registered_sinks = {}
+
+    for x in data:
+        if x[1] not in registered_sinks:
+            registered_sinks[x[1]] = 1
+        else:
+            registered_sinks[x[1]] += 1
+
+    return jsonify(registered_sinks), 200
 
 @app.route('/api/iphone-test', methods=['GET'])
 def iphone_test():
