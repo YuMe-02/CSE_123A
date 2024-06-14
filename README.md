@@ -1,4 +1,14 @@
-# HydroConnect
+<h1 align="center">HydroConnect</h1>
+
+<p align="center">
+  <img alt="Github top language" src="https://img.shields.io/github/languages/top/YuMe-02/CSE_123A?color=56BEB8">
+
+  <img alt="Github language count" src="https://img.shields.io/github/languages/count/YuMe-02/CSE_123A?color=56BEB8">
+
+  <img alt="Repository size" src="https://img.shields.io/github/repo-size/YuMe-02/CSE_123A?color=56BEB8">
+  
+</p>
+
 
 This repo contains all the code used for the HydroConnect water sensing system. We have organized the repo with the following file structure and important files:
 
